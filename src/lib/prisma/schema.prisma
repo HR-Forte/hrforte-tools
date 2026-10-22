@@ -1,0 +1,176 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  name      String?
+  password  String
+  avatar    String?
+
+  roleAssignments RoleAssignment[]
+
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+  createdBy String?
+
+  @@index([isDeleted])
+  @@index([isDeleted, email])
+  @@index([isDeleted, createdAt])
+}
+
+model Role {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  description  String
+  // permissions  String[]
+
+  roleAssignments RoleAssignment[]
+
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+  createdBy String?
+}
+
+model RoleAssignment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  roleId    String   @db.ObjectId
+  assignedAt DateTime @default(now())
+  assignedBy String?  @db.ObjectId
+  expiresAt  DateTime?
+  
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+  
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+  createdBy String?
+
+  // @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@index([userId, isDeleted])
+  @@index([userId, roleId, isDeleted])
+}
+
+model Excalidraw {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  elements    Json     // Excalidraw scene elements
+  appState    Json?    // Excalidraw app state
+  metadata    Json?    // Additional metadata
+  userId      String?  @db.ObjectId // Reference to user who created it
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?
+  createdBy   String?
+  
+  // Optional: Add relation to User if needed
+  // user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([userId, isDeleted, createdAt]) // list query: own, non-deleted, newest first
+}
+
+model Environment {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String   @unique
+  description String?
+  variables   EnvironmentVariable[]
+
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String?
+  updatedBy  String?
+
+  @@index([isDeleted])
+}
+
+model EnvironmentVariable {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  environmentId  String   @db.ObjectId
+  key            String
+  valueEncrypted String
+  environment    Environment @relation(fields: [environmentId], references: [id])
+
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([environmentId])
+  @@index([environmentId, isDeleted])
+  @@index([environmentId, key, isDeleted]) // per-key lookups
+}
+
+model LinkGroup {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  order       Int      @default(0)
+  links       Link[]
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+}
+
+model Link {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  url         String
+  description String?
+  favicon     String?
+  groupId     String?    @db.ObjectId
+  group       LinkGroup? @relation(fields: [groupId], references: [id])
+  order       Int        @default(0)
+  isDeleted   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@index([groupId])
+  @@index([isDeleted])
+}
+
+model Note {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String
+  isPublic  Boolean  @default(false)
+  userId    String   @db.ObjectId
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+
+  @@index([userId])
+  @@index([isPublic, isDeleted])
+  @@index([userId, isDeleted])
+}

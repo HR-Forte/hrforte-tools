@@ -1,0 +1,6 @@
+{
+  "uri": "mongodb+srv://haivd:I1wkM2Ycujrl00Yf@hrforte.kpi97yy.mongodb.net",
+  "database": "hrforte-management",
+  "migrationsDir": "migrations",
+  "migrationsCollection": "migrations"
+}
