@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import type { UseQueryResult } from '@tanstack/react-query';
+import Link from 'next/link';
+import { useUser } from '@/lib/contexts/UserContext';
+import { canAccessLink, links } from '../_components/MainSidebar';
 
 type HealthStatus = 'healthy' | 'unhealthy' | 'loading';
 
@@ -89,6 +92,8 @@ function ServiceItem({ item }: { item: SectionItem }) {
 }
 
 const DashboardPage = () => {
+  const { user } = useUser();
+  const quickLinks = links.filter(link => link.href !== '/dashboard' && canAccessLink(link, user?.roles));
   const evaQuery = useHealthVersion('EVA');
   const devQuery = useHealthVersion('DEV');
   const miaQuery = useHealthVersion('MIA');
@@ -150,14 +155,31 @@ const DashboardPage = () => {
   return (
     <div className='min-h-screen overflow-y-auto bg-background px-6 py-10'>
       <div className='mx-auto flex w-full max-w-6xl flex-col gap-10'>
-        <div className='flex flex-col gap-6 md:flex-row md:items-center md:justify-between'>
-          <div className='space-y-2'>
-            <p className='text-sm font-medium uppercase tracking-[0.3em] text-muted-foreground'>System Overview</p>
-            <h1 className='text-3xl font-semibold text-foreground md:text-4xl'>Dashboard</h1>
-            <p className='text-sm text-muted-foreground'>
-              Live service versions across environments, grouped by product area.
-            </p>
+        <div className='space-y-2'>
+          <p className='text-sm font-medium uppercase tracking-[0.3em] text-muted-foreground'>System Overview</p>
+          <h1 className='text-3xl font-semibold text-foreground md:text-4xl'>Dashboard</h1>
+          <p className='text-sm text-muted-foreground'>
+            Live service versions across environments, grouped by product area.
+          </p>
+        </div>
+
+        <div className='space-y-3'>
+          <h2 className='text-sm font-medium uppercase tracking-[0.3em] text-muted-foreground'>Quick Access</h2>
+          <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5'>
+            {quickLinks.map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className='flex items-center gap-3 rounded-xl border border-border/60 bg-card/50 px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-border hover:bg-muted'
+              >
+                {link.icon}
+                <span className='truncate'>{link.label}</span>
+              </Link>
+            ))}
           </div>
+        </div>
+
+        <div className='flex justify-end'>
           <Button onClick={refreshAll} disabled={isFetchingAny} className='w-full md:w-auto'>
             {isFetchingAny && <Loader2 className='animate-spin' aria-hidden />}
             Reload Versions

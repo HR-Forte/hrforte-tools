@@ -22,7 +22,7 @@ import Image from 'next/image';
 import { useUser } from '@/lib/contexts/UserContext';
 import { ThemeTogglerButton } from '@/components/animate-ui/components/buttons/theme-toggler';
 
-const links = [
+export const links = [
   {
     label: 'Dashboard',
     href: '/dashboard',
@@ -105,6 +105,9 @@ const links = [
 //   );
 // };
 
+export const canAccessLink = (link: { permissions?: string[] }, roles?: { name: string }[]) =>
+  !link.permissions?.length || !!roles?.some(role => link.permissions?.includes(role.name) || role.name === 'Admin');
+
 const MainSidebar = () => {
   const [open, setOpen] = useState(false);
   const { user } = useUser();
@@ -120,13 +123,7 @@ const MainSidebar = () => {
 
           <div className='mt-8 flex flex-col gap-2'>
             {links
-              .filter(link => {
-                if (!link.permissions || link.permissions?.length === 0) {
-                  return true;
-                }
-
-                return user?.roles?.some(role => link.permissions?.includes(role.name) || role.name === 'Admin');
-              })
+              .filter(link => canAccessLink(link, user?.roles))
               .map((link, idx) => (
                 <SidebarLink link={link} key={link.href} />
               ))}
