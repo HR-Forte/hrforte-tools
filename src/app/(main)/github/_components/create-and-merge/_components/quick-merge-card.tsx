@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -20,7 +19,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { MANAGED_REPO_NAMES, REPO_NAME_ENUM, REPO_NAME_MAPPING } from '@/modules/change-log/change-log.const';
-import { GitMerge, Loader2, Rocket, Zap } from 'lucide-react';
+import { GitMerge, Loader2, Rocket, Settings2, SlidersHorizontal, Zap } from 'lucide-react';
 import type { QuickMergeOverrides } from '../_types';
 import { BranchInputPair } from './branch-input-pair';
 import { CardSectionLabel } from './card-section-label';
@@ -73,7 +72,6 @@ interface QuickMergeCardProps {
   onHeadChange: (value: string) => void;
   onTitleChange: (value: string) => void;
   onBodyChange: (value: string) => void;
-  onDraftChange: (value: boolean) => void;
   onToggleRepo: (fullName: string) => void;
   onSelectAll: () => void;
   onClearAll: () => void;
@@ -92,7 +90,6 @@ export function QuickMergeCard({
   onHeadChange,
   onTitleChange,
   onBodyChange,
-  onDraftChange,
   onToggleRepo,
   onSelectAll,
   onClearAll,
@@ -153,61 +150,94 @@ export function QuickMergeCard({
         </CardHeader>
         <CardContent className='relative space-y-5'>
           <div className='space-y-3'>
-            <CardSectionLabel
-              action={
+            <CardSectionLabel>
+              <Settings2 className='h-3.5 w-3.5' aria-hidden />
+              Applies to both
+            </CardSectionLabel>
+            <div className='space-y-2'>
+              <div className='flex items-center justify-between gap-2'>
+                <span className='text-sm font-medium text-foreground'>Repositories</span>
                 <div className='flex items-center gap-2'>
                   {quickSelectedRepos.size > 0 ? (
-                    <Badge variant='secondary' className='text-[10px] font-normal normal-case tracking-normal'>
+                    <Badge variant='secondary' className='text-[10px] font-normal'>
                       {quickSelectedRepos.size} selected
                     </Badge>
                   ) : null}
                   <div className='flex gap-1.5'>
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    onClick={onSelectAll}
-                    className='h-7 cursor-pointer text-xs transition-colors duration-200'
-                  >
-                    All
-                  </Button>
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    onClick={onClearAll}
-                    className='h-7 cursor-pointer text-xs transition-colors duration-200'
-                  >
-                    None
-                  </Button>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={onSelectAll}
+                      className='h-7 cursor-pointer text-xs transition-colors duration-200'
+                    >
+                      All
+                    </Button>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={onClearAll}
+                      className='h-7 cursor-pointer text-xs transition-colors duration-200'
+                    >
+                      None
+                    </Button>
                   </div>
                 </div>
-              }
-            >
-              Repositories
-            </CardSectionLabel>
-            <div className='max-h-36 overflow-y-auto rounded-xl border border-border/50 bg-muted/20 p-2'>
-              {MANAGED_REPO_NAMES.map(fn => {
-                const repoInfo = REPO_NAME_MAPPING[fn];
-                const isSelected = quickSelectedRepos.has(fn);
-                return (
-                  <label
-                    key={fn}
-                    className='flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors duration-200 hover:bg-muted/60 has-[:checked]:bg-purple-500/10'
-                  >
-                    <Checkbox checked={isSelected} onCheckedChange={() => onToggleRepo(fn)} />
-                    <span
-                      className='h-2 w-2 shrink-0 rounded-full'
-                      style={{ backgroundColor: repoInfo?.color ?? 'var(--muted-foreground)' }}
-                      aria-hidden
-                    />
-                    <span className='text-sm font-medium'>{repoInfo?.name ?? fn}</span>
-                  </label>
-                );
-              })}
+              </div>
+              <div className='max-h-36 overflow-y-auto rounded-xl border border-border/50 bg-muted/20 p-2'>
+                {MANAGED_REPO_NAMES.map(fn => {
+                  const repoInfo = REPO_NAME_MAPPING[fn];
+                  const isSelected = quickSelectedRepos.has(fn);
+                  return (
+                    <label
+                      key={fn}
+                      className='flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors duration-200 hover:bg-muted/60 has-[:checked]:bg-purple-500/10'
+                    >
+                      <Checkbox checked={isSelected} onCheckedChange={() => onToggleRepo(fn)} />
+                      <span
+                        className='h-2 w-2 shrink-0 rounded-full'
+                        style={{ backgroundColor: repoInfo?.color ?? 'var(--muted-foreground)' }}
+                        aria-hidden
+                      />
+                      <span className='text-sm font-medium'>{repoInfo?.name ?? fn}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
+            <div className='space-y-2'>
+              <label htmlFor={`${fieldId}-body`} className='text-sm font-medium text-foreground'>
+                Description <span className='font-normal text-muted-foreground'>(optional)</span>
+              </label>
+              <Textarea
+                id={`${fieldId}-body`}
+                value={quickBody}
+                onChange={e => onBodyChange(e.target.value)}
+                rows={3}
+                className='resize-none border-border/80 bg-background/80'
+                placeholder='Optional description...'
+              />
+            </div>
+            {isNETRepo && quickSelectedRepos.size !== 1 ? (
+              <p className='rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive'>
+                Please select only one .NET API repository to run quick merge
+              </p>
+            ) : null}
           </div>
 
-          <div className='space-y-3'>
-            <CardSectionLabel>Deploy presets</CardSectionLabel>
+          <div className='space-y-3 rounded-xl border border-purple-500/30 bg-purple-500/5 p-4'>
+            <CardSectionLabel
+              action={
+                <Badge variant='secondary' className='text-[10px] font-normal normal-case tracking-normal'>
+                  One click
+                </Badge>
+              }
+            >
+              <Zap className='h-3.5 w-3.5 text-purple-600 dark:text-purple-400' aria-hidden />
+              Quick actions
+            </CardSectionLabel>
+            <p className='text-xs text-muted-foreground'>
+              Preset branches and title for every selected repo, using the settings above. You confirm before anything runs.
+            </p>
             <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
               {QUICK_MERGE_PRESETS.map(preset => (
                 <Button
@@ -228,7 +258,7 @@ export function QuickMergeCard({
                     (isNETRepo && quickSelectedRepos.size !== 1) ||
                     ignoreQuickMerge.some(repo => quickSelectedRepos.has(repo))
                   }
-                  className='h-10 w-full cursor-pointer justify-start font-medium shadow-sm transition-colors duration-200 hover:border-purple-500/40 hover:bg-purple-500/5'
+                  className='h-10 w-full cursor-pointer justify-start bg-background/80 font-medium shadow-sm transition-colors duration-200 hover:border-purple-500/40 hover:bg-purple-500/5'
                 >
                   <Rocket className='mr-2 h-3.5 w-3.5 shrink-0 text-purple-600 dark:text-purple-400' />
                   {preset.label}
@@ -237,15 +267,22 @@ export function QuickMergeCard({
             </div>
           </div>
 
-          <div className='space-y-3'>
-            <CardSectionLabel>Manual configuration</CardSectionLabel>
+          <div className='flex items-center gap-3 text-xs text-muted-foreground'>
+            <span className='h-px flex-1 bg-border' />
+            or configure manually
+            <span className='h-px flex-1 bg-border' />
+          </div>
+
+          <div className='space-y-4 rounded-xl border border-border/50 p-4'>
+            <CardSectionLabel>
+              <SlidersHorizontal className='h-3.5 w-3.5' aria-hidden />
+              Manual
+            </CardSectionLabel>
             <BranchInputPair
               base={quickBase}
               head={quickHead}
               onBaseChange={onBaseChange}
               onHeadChange={onHeadChange}
-              basePlaceholder='production'
-              headPlaceholder='develop'
             />
 
             <div className='space-y-2'>
@@ -260,52 +297,25 @@ export function QuickMergeCard({
                 placeholder='Quick PR'
               />
             </div>
-            <div className='space-y-2'>
-              <label htmlFor={`${fieldId}-body`} className='text-sm font-medium text-foreground'>
-                Description
-              </label>
-              <Textarea
-                id={`${fieldId}-body`}
-                value={quickBody}
-                onChange={e => onBodyChange(e.target.value)}
-                rows={3}
-                className='resize-none border-border/80 bg-background/80'
-                placeholder='Optional description...'
-              />
-            </div>
-            <div className='flex items-center justify-between rounded-xl border border-border/50 bg-muted/30 px-4 py-3 transition-colors duration-200'>
-              <div>
-                <label htmlFor={`${fieldId}-draft`} className='block text-sm font-medium text-foreground'>
-                  Draft PRs
-                </label>
-                <p className='text-xs text-muted-foreground'>Create as drafts until ready</p>
-              </div>
-              <Switch id={`${fieldId}-draft`} checked={quickDraft} onCheckedChange={onDraftChange} />
-            </div>
-            {isNETRepo && quickSelectedRepos.size !== 1 ? (
-              <p className='rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive'>
-                Please select only one .NET API repository to run quick merge
-              </p>
-            ) : null}
-          </div>
 
-          <Button
-            onClick={() => requestMerge()}
-            disabled={quickRunning || (isNETRepo && quickSelectedRepos.size !== 1)}
-            className='h-11 w-full cursor-pointer font-medium shadow-sm transition-colors duration-200'
-          >
-            {quickRunning ? (
-              <>
-                <Loader2 className='h-4 w-4 animate-spin' />
-                Running...
-              </>
-            ) : (
-              <>
-                <GitMerge className='h-4 w-4' />
-                Run Quick Merge
-              </>
-            )}
-          </Button>
+            <Button
+              onClick={() => requestMerge()}
+              disabled={quickRunning || (isNETRepo && quickSelectedRepos.size !== 1)}
+              className='h-11 w-full cursor-pointer font-medium shadow-sm transition-colors duration-200'
+            >
+              {quickRunning ? (
+                <>
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                  Running...
+                </>
+              ) : (
+                <>
+                  <GitMerge className='h-4 w-4' />
+                  Run Quick Merge
+                </>
+              )}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

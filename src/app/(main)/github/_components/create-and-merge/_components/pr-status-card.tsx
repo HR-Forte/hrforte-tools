@@ -246,7 +246,7 @@ export function PrStatusCard({ createdPrs, onClearAll }: PrStatusCardProps) {
               <FileText className='h-10 w-10 text-muted-foreground/50' />
             </div>
             <p className='mt-4 text-sm font-medium text-muted-foreground'>No pull request created yet</p>
-            <p className='mt-1 text-xs text-muted-foreground'>Create a PR above to track its merge status here</p>
+            <p className='mt-1 text-xs text-muted-foreground'>Create a PR to track its merge status here</p>
           </div>
         ) : (
           <div className='space-y-3'>

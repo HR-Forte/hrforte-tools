@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, GitMerge, Layers, Zap } from 'lucide-react';
+import { GitMerge, GitPullRequest, Layers, Zap } from 'lucide-react';
 import { MANAGED_REPO_NAMES } from '@/modules/change-log/change-log.const';
 import { useCreatedPrs } from './create-and-merge/_hooks/use-created-prs';
 import { useQuickMerge } from './create-and-merge/_hooks/use-quick-merge';
@@ -27,7 +27,6 @@ const CreateAndMergeTab = () => {
     quickBody,
     setQuickBody,
     quickDraft,
-    setQuickDraft,
     quickRunning,
     actionLogs,
     toggleQuickRepo,
@@ -73,15 +72,22 @@ const CreateAndMergeTab = () => {
       </div>
 
       <WorkflowSection
-        title='Merge & Deploy'
-        description='Direct branch merges, single PR creation, or batch create-and-merge across repositories.'
-        icon={<GitMerge className='h-5 w-5 text-green-600 dark:text-green-400' />}
+        title='Create Pull Request'
+        description='Create a single PR and track its mergeability.'
+        icon={<GitPullRequest className='h-5 w-5 text-green-600 dark:text-green-400' />}
       >
-        <div className='grid gap-6 lg:grid-cols-2'>
-          <DirectMergeCard />
-
+        <div className='grid items-start gap-6 xl:grid-cols-2'>
           <CreatePrCard onPrCreated={addCreatedPr} />
+          <PrStatusCard createdPrs={createdPrs} onClearAll={clearCreatedPrs} />
+        </div>
+      </WorkflowSection>
 
+      <WorkflowSection
+        title='Quick Create & Merge'
+        description='Batch create-and-merge across repositories and review run outcomes.'
+        icon={<Zap className='h-5 w-5 text-purple-600 dark:text-purple-400' />}
+      >
+        <div className='grid items-start gap-6 xl:grid-cols-2'>
           <QuickMergeCard
             quickSelectedRepos={quickSelectedRepos}
             quickBase={quickBase}
@@ -94,23 +100,11 @@ const CreateAndMergeTab = () => {
             onHeadChange={setQuickHead}
             onTitleChange={setQuickTitle}
             onBodyChange={setQuickBody}
-            onDraftChange={setQuickDraft}
             onToggleRepo={toggleQuickRepo}
             onSelectAll={selectAllQuickRepos}
             onClearAll={clearQuickRepos}
             onRunQuickMerge={runQuickMerge}
           />
-        </div>
-      </WorkflowSection>
-
-      <WorkflowSection
-        title='Activity & Results'
-        description='Track PR mergeability and review outcomes from quick merge runs.'
-        icon={<Activity className='h-5 w-5 text-primary' />}
-      >
-        <div className='grid gap-6'>
-          <PrStatusCard createdPrs={createdPrs} onClearAll={clearCreatedPrs} />
-
           <QuickMergeResultsCard
             actionLogs={actionLogs}
             quickMergeHistory={quickMergeHistory}
@@ -119,6 +113,14 @@ const CreateAndMergeTab = () => {
             onClearHistory={clearHistory}
           />
         </div>
+      </WorkflowSection>
+
+      <WorkflowSection
+        title='Direct Branch Merge'
+        description='Merge one branch into another directly, without a PR.'
+        icon={<GitMerge className='h-5 w-5 text-primary' />}
+      >
+        <DirectMergeCard />
       </WorkflowSection>
     </div>
   );

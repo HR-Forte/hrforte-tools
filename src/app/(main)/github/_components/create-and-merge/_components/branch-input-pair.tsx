@@ -2,7 +2,7 @@
 
 import { useId } from 'react';
 import { Input } from '@/components/ui/input';
-import { ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface BranchInputPairProps {
   base: string;
@@ -18,7 +18,7 @@ export function BranchInputPair({
   head,
   onBaseChange,
   onHeadChange,
-  basePlaceholder = 'main',
+  basePlaceholder = 'deployment/mia',
   headPlaceholder = 'develop',
 }: BranchInputPairProps) {
   const baseId = useId();
@@ -41,7 +41,7 @@ export function BranchInputPair({
 
         <div className='hidden sm:flex h-10 items-center justify-center'>
           <div className='flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background shadow-sm'>
-            <ArrowRight className='h-3.5 w-3.5 text-primary' aria-hidden />
+            <ArrowLeft className='h-3.5 w-3.5 text-primary' aria-hidden />
           </div>
         </div>
 

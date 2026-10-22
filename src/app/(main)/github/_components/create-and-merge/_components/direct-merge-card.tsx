@@ -8,7 +8,8 @@ import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MANAGED_REPO_NAMES, REPO_NAME_ENUM, REPO_NAME_MAPPING } from '@/modules/change-log/change-log.const';
 import { useMergeBranches } from '@/modules/github/github.query';
-import { Loader2, GitMerge, Rocket } from 'lucide-react';
+import { Loader2, GitMerge, Rocket, Settings2, SlidersHorizontal, Zap } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { BranchInputPair } from './branch-input-pair';
 import { CardSectionLabel } from './card-section-label';
@@ -108,10 +109,12 @@ export function DirectMergeCard() {
         </div>
       </CardHeader>
       <CardContent className='relative space-y-6'>
-        <div className='grid gap-6 lg:grid-cols-2'>
-          <div className='space-y-5'>
-            <CardSectionLabel>Configuration</CardSectionLabel>
-
+        <div className='space-y-3'>
+          <CardSectionLabel>
+            <Settings2 className='h-3.5 w-3.5' aria-hidden />
+            Applies to both
+          </CardSectionLabel>
+          <div className='grid gap-4 lg:grid-cols-2'>
             <div className='space-y-2'>
               <label htmlFor={repoId} className='text-sm font-medium text-foreground'>
                 Repository
@@ -130,15 +133,6 @@ export function DirectMergeCard() {
               </Select>
             </div>
 
-            <BranchInputPair
-              base={baseBranch}
-              head={headBranch}
-              onBaseChange={setBaseBranch}
-              onHeadChange={setHeadBranch}
-              basePlaceholder='main'
-              headPlaceholder='develop'
-            />
-
             <div className='space-y-2'>
               <label htmlFor={commitMessageId} className='text-sm font-medium text-foreground'>
                 Commit Message <span className='font-normal text-muted-foreground'>(optional)</span>
@@ -151,6 +145,83 @@ export function DirectMergeCard() {
                 placeholder='Leave empty for default merge commit message'
               />
             </div>
+          </div>
+        </div>
+
+        <div className='grid items-start gap-6 lg:grid-cols-2'>
+          <div className='space-y-3 rounded-xl border border-green-500/30 bg-green-500/5 p-4'>
+            <CardSectionLabel
+              action={
+                <Badge variant='secondary' className='text-[10px] font-normal normal-case tracking-normal'>
+                  One click
+                </Badge>
+              }
+            >
+              <Zap className='h-3.5 w-3.5 text-green-600 dark:text-green-400' aria-hidden />
+              Quick actions
+            </CardSectionLabel>
+            <p className='text-xs text-muted-foreground'>
+              Preset branches on the selected repository. You confirm before anything is merged.
+            </p>
+
+            <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
+              {QUICK_MERGE_PRESETS.map(preset => (
+                <Button
+                  key={`${preset.head}-${preset.base}`}
+                  onClick={() => handleMerge({ head: preset.head, base: preset.base })}
+                  variant='outline'
+                  className='h-10 cursor-pointer justify-start bg-background/80 font-medium shadow-sm transition-colors duration-200 hover:border-green-500/40 hover:bg-green-500/5'
+                  disabled={mergeBranches.isPending || ignoreQuickMerge.includes(selectedRepo) || !selectedRepo}
+                >
+                  <Rocket className='mr-2 h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400' />
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+
+            <div className='space-y-3 rounded-xl border border-border/50 bg-background/60 p-4'>
+              <CardSectionLabel
+                action={
+                  <span className='text-[11px] font-normal normal-case tracking-normal text-muted-foreground'>
+                    Always targets .NET API
+                  </span>
+                }
+              >
+                .NET API presets
+              </CardSectionLabel>
+              <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
+                {QUICK_MERGE_NET_CORE_PRESETS.map(preset => (
+                  <Button
+                    key={`${preset.head}-${preset.base}`}
+                    onClick={() =>
+                      handleMerge({ head: preset.head, base: preset.base, repo: REPO_NAME_ENUM['.NET API'] })
+                    }
+                    disabled={mergeBranches.isPending}
+                    variant='outline'
+                    className='h-10 cursor-pointer justify-start font-medium shadow-sm transition-colors duration-200 hover:border-primary/40 hover:bg-primary/5'
+                  >
+                    <Rocket className='mr-2 h-3.5 w-3.5 shrink-0 text-primary' />
+                    {preset.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className='space-y-4 rounded-xl border border-border/50 p-4'>
+            <CardSectionLabel>
+              <SlidersHorizontal className='h-3.5 w-3.5' aria-hidden />
+              Manual
+            </CardSectionLabel>
+
+            <BranchInputPair
+              base={baseBranch}
+              head={headBranch}
+              onBaseChange={setBaseBranch}
+              onHeadChange={setHeadBranch}
+              basePlaceholder='main'
+              headPlaceholder='develop'
+            />
 
             <Button
               onClick={() => handleMerge()}
@@ -169,53 +240,6 @@ export function DirectMergeCard() {
                 </>
               )}
             </Button>
-          </div>
-
-          <div className='space-y-4'>
-            <CardSectionLabel
-              action={
-                <span className='text-[11px] font-normal normal-case tracking-normal text-muted-foreground'>
-                  Uses selected repo
-                </span>
-              }
-            >
-              Deploy presets
-            </CardSectionLabel>
-
-            <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
-              {QUICK_MERGE_PRESETS.map(preset => (
-                <Button
-                  key={`${preset.head}-${preset.base}`}
-                  onClick={() => handleMerge({ head: preset.head, base: preset.base })}
-                  variant='outline'
-                  className='h-10 cursor-pointer justify-start font-medium shadow-sm transition-colors duration-200 hover:border-green-500/40 hover:bg-green-500/5'
-                  disabled={mergeBranches.isPending || ignoreQuickMerge.includes(selectedRepo) || !selectedRepo}
-                >
-                  <Rocket className='mr-2 h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400' />
-                  {preset.label}
-                </Button>
-              ))}
-            </div>
-
-            <div className='space-y-3 rounded-xl border border-border/50 bg-muted/20 p-4'>
-              <CardSectionLabel>.NET API presets</CardSectionLabel>
-              <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
-                {QUICK_MERGE_NET_CORE_PRESETS.map(preset => (
-                  <Button
-                    key={`${preset.head}-${preset.base}`}
-                    onClick={() =>
-                      handleMerge({ head: preset.head, base: preset.base, repo: REPO_NAME_ENUM['.NET API'] })
-                    }
-                    disabled={mergeBranches.isPending}
-                    variant='outline'
-                    className='h-10 cursor-pointer justify-start font-medium shadow-sm transition-colors duration-200 hover:border-primary/40 hover:bg-primary/5'
-                  >
-                    <Rocket className='mr-2 h-3.5 w-3.5 shrink-0 text-primary' />
-                    {preset.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </CardContent>
