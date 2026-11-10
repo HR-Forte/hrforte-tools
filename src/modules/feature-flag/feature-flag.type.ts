@@ -13,6 +13,7 @@ export const FeatureFlagNameEnum = {
   IMPORT_TIME_ENTRY: 'importTimeEntry',
   HONO_SSO_BUTTON: 'honoSsoButton',
   STREAMLINED_IMPORT: 'streamlinedImport',
+  TOKEN_LINK_APPROVER: 'guestApprovalLink',
 } as const;
 
 export type FeatureFlagName = (typeof FeatureFlagNameEnum)[keyof typeof FeatureFlagNameEnum];
@@ -30,6 +31,7 @@ export const FeatureFlagHeaderMap = {
   [FeatureFlagNameEnum.IMPORT_TIME_ENTRY]: 'Import Time Entry',
   [FeatureFlagNameEnum.HONO_SSO_BUTTON]: 'HONO SSO Button',
   [FeatureFlagNameEnum.STREAMLINED_IMPORT]: 'Streamlined Import',
+  [FeatureFlagNameEnum.TOKEN_LINK_APPROVER]: 'Token Link Approver',
 } as const;
 
 export interface CompanyFeatureFlag {
