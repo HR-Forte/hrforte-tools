@@ -3,14 +3,7 @@
     {
       "name": "Default",
       "files": [
-        "docs/HARDENING_PLAN.md",
-        "src/app/(main)/askgenie/_components/AskGenieCompanyList.tsx",
-        "src/app/(main)/feature-flags/_components/CreateFeatureFlagModal.tsx",
-        "src/app/(main)/feature-flags/_components/FeatureFlagCompanyOverrides.tsx",
-        "src/app/(main)/feature-flags/_components/FeatureFlagDefault.tsx",
-        "src/app/(main)/feature-flags/page.tsx",
-        ".vscode/changelists.json",
-        "src/app/(main)/esmart-time/_components/ESmartTimeCompanyList.tsx"
+        "src/modules/feature-flag/feature-flag.type.ts"
       ]
     }
   ],

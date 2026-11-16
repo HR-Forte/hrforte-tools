@@ -14,6 +14,7 @@ export const FeatureFlagNameEnum = {
   HONO_SSO_BUTTON: 'honoSsoButton',
   STREAMLINED_IMPORT: 'streamlinedImport',
   TOKEN_LINK_APPROVER: 'guestApprovalLink',
+  ROSTER_EST: 'rosterEst',
 } as const;
 
 export type FeatureFlagName = (typeof FeatureFlagNameEnum)[keyof typeof FeatureFlagNameEnum];
@@ -32,6 +33,7 @@ export const FeatureFlagHeaderMap = {
   [FeatureFlagNameEnum.HONO_SSO_BUTTON]: 'HONO SSO Button',
   [FeatureFlagNameEnum.STREAMLINED_IMPORT]: 'Streamlined Import',
   [FeatureFlagNameEnum.TOKEN_LINK_APPROVER]: 'Token Link Approver',
+  [FeatureFlagNameEnum.ROSTER_EST]: 'Roster E-Smart Time',
 } as const;
 
 export interface CompanyFeatureFlag {
