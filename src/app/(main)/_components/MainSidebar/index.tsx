@@ -21,6 +21,7 @@ import { useState } from 'react';
 import Logo from '@/app/logo.svg';
 import Image from 'next/image';
 import { useUser } from '@/lib/contexts/UserContext';
+import { isAdmin } from '@/modules/user/user.util';
 import { ThemeTogglerButton } from '@/components/animate-ui/components/buttons/theme-toggler';
 
 export const links = [
@@ -113,7 +114,7 @@ export const links = [
 // };
 
 export const canAccessLink = (link: { permissions?: string[] }, roles?: { name: string }[]) =>
-  !link.permissions?.length || !!roles?.some(role => link.permissions?.includes(role.name) || role.name === 'Admin');
+  !link.permissions?.length || isAdmin({ roles }) || !!roles?.some(role => link.permissions?.includes(role.name));
 
 const MainSidebar = () => {
   const [open, setOpen] = useState(false);

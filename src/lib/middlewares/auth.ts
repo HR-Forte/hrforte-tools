@@ -4,7 +4,8 @@ import prisma from '@/lib/prisma/prismaClient';
 import ErrorService from '@/lib/error/errorService';
 import { formatErrorResponse, getRequestId } from '../utils';
 import { UserWithRoles } from '@/modules/user/user.model';
-import { isAdmin } from '@/modules/user/user.util';
+import { isAdmin, isSuperAdmin } from '@/modules/user/user.util';
+import { ROLE } from '@/modules/role/role.model';
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: UserWithRoles; // User object from JWT payload
@@ -44,7 +45,7 @@ export async function handleAuth(request: NextRequest) {
   return undefined; // Continue to next handler
 }
 
-export { isAdmin };
+export { isAdmin, isSuperAdmin };
 
 // Authenticate, then authorize against roles loaded from the DB (not the JWT),
 // so archived users and revoked roles lose access immediately.
@@ -64,8 +65,14 @@ export async function requireRole(request: NextRequest, ...roles: string[]) {
   });
   user.roles = assignments.map(a => a.role);
 
-  if (!user.roles.some(r => roles.includes(r.name))) {
-    const type = roles.length === 1 && roles[0] === 'Admin' ? 'ADMIN_ONLY' : 'INSUFFICIENT_PERMISSIONS';
+  // Super Admin has full permissions and passes every role check
+  if (!isSuperAdmin(user) && !user.roles.some(r => roles.includes(r.name))) {
+    const type =
+      roles.length === 1 && roles[0] === ROLE.ADMIN
+        ? 'ADMIN_ONLY'
+        : roles.length === 1 && roles[0] === ROLE.SUPER_ADMIN
+          ? 'SUPER_ADMIN_ONLY'
+          : 'INSUFFICIENT_PERMISSIONS';
     return formatErrorResponse(
       ErrorService.createError({ type, options: { requestId: getRequestId(request) } }),
       request
@@ -75,4 +82,5 @@ export async function requireRole(request: NextRequest, ...roles: string[]) {
   return undefined;
 }
 
-export const requireAdmin = (request: NextRequest) => requireRole(request, 'Admin');
+export const requireAdmin = (request: NextRequest) => requireRole(request, ROLE.ADMIN);
+export const requireSuperAdmin = (request: NextRequest) => requireRole(request, ROLE.SUPER_ADMIN);

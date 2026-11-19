@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { RefreshCcw, Plus, Link2, FolderPlus } from 'lucide-react';
 import { useUser } from '@/lib/contexts/UserContext';
+import { isAdmin as hasAdminRole } from '@/modules/user/user.util';
 import {
   useLinksGrouped,
   useCreateLink,
@@ -24,7 +25,7 @@ import { QueryError } from '@/components/query-error';
 
 const LinksPage = () => {
   const { user } = useUser();
-  const isAdmin = user?.roles?.some(r => r.name === 'Admin') ?? false;
+  const isAdmin = hasAdminRole(user);
 
   const { data, isPending, isError, error, isFetching, refetch } = useLinksGrouped();
   const groups = (data?.groups ?? []) as SafeLinkGroup[];

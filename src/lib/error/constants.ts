@@ -102,6 +102,13 @@ export const ERROR = {
     SEVERITY: ErrorSeverity.CRITICAL,
     HTTP_STATUS: 403,
   },
+  SUPER_ADMIN_ONLY: {
+    CODE: 'AUTHZ_006',
+    MESSAGE: 'This action is restricted to super administrators only',
+    CATEGORY: ErrorCategory.AUTHENTICATION,
+    SEVERITY: ErrorSeverity.CRITICAL,
+    HTTP_STATUS: 403,
+  },
   SELF_ACCESS_ONLY: {
     CODE: 'AUTHZ_005',
     MESSAGE: 'You can only access your own resources',

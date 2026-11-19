@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma/prismaClient';
 import ErrorService from '@/lib/error/errorService';
 import { RoleAssignment } from './role-assignment.model';
+import { HIDDEN_ROLES } from '../role/role.model';
 
 class RoleAssignmentService {
   async assignRoleToUser(userId: string, roleId: string, assignedBy?: string): Promise<RoleAssignment> {
@@ -16,6 +17,7 @@ class RoleAssignmentService {
     if (!role) {
       throw ErrorService.createError({ type: 'ROLE_NOT_FOUND' });
     }
+    this.assertManageable(role.name);
 
     // Check if assignment already exists
     const existingAssignment = await prisma.roleAssignment.findFirst({
@@ -45,7 +47,20 @@ class RoleAssignmentService {
     return assignment;
   }
 
+  // Hidden roles (e.g. Super Admin) are managed by migrations only
+  private assertManageable(roleName: string) {
+    if (HIDDEN_ROLES.includes(roleName)) {
+      throw ErrorService.createError({
+        type: 'INSUFFICIENT_PERMISSIONS',
+        message: "This role can't be managed from the app",
+      });
+    }
+  }
+
   async unassignRoleFromUser(userId: string, roleId: string): Promise<void> {
+    const role = await prisma.role.findUnique({ where: { id: roleId }, select: { name: true } });
+    if (role) this.assertManageable(role.name);
+
     // Check if assignment exists
     const assignment = await prisma.roleAssignment.findFirst({
       where: {

@@ -1,4 +1,5 @@
 import type { User, SafeUser } from './user.model';
+import { HIDDEN_ROLES, ROLE } from '../role/role.model';
 // Utility function to convert User to SafeUser (removes sensitive data)
 export function toSafeUser(user: User): SafeUser {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -29,4 +30,14 @@ export function validateName(name: string): boolean {
   return name.length >= 2 && name.length <= 100;
 }
 
-export const isAdmin = (user?: { roles?: { name: string }[] } | null) => !!user?.roles?.some(r => r.name === 'Admin');
+type WithRoleNames = { roles?: { name: string }[] } | null | undefined;
+
+export const isSuperAdmin = (user?: WithRoleNames) => !!user?.roles?.some(r => r.name === ROLE.SUPER_ADMIN);
+
+// Super Admin has every Admin permission
+export const isAdmin = (user?: WithRoleNames) =>
+  !!user?.roles?.some(r => r.name === ROLE.ADMIN || r.name === ROLE.SUPER_ADMIN);
+
+// Strip hidden roles (e.g. Super Admin) before listing/displaying roles
+export const withoutHiddenRoles = <T extends { name: string }>(roles?: T[] | null): T[] =>
+  (roles ?? []).filter(r => !HIDDEN_ROLES.includes(r.name));

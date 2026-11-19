@@ -7,6 +7,7 @@ import { UserWithRoles } from '@/modules/user/user.model';
 import { CustomRole } from '@/modules/role/role.model';
 import { GetAllUsersResponse } from '@/modules/user/user.type';
 import { userService } from '@/modules/user/user.service';
+import { withoutHiddenRoles } from '@/modules/user/user.util';
 
 export const GET = apiErrorHandler(async request => {
   const authResponse = await requireAdmin(request);
@@ -76,10 +77,10 @@ export const GET = apiErrorHandler(async request => {
 
   // Map users with their roles
   const usersWithRoles: UserWithRoles[] = users.map(user => {
-    const roles: CustomRole[] = (user.roleAssignments || []).map(ra => ({
-      id: ra.role.id,
-      name: ra.role.name,
-      description: ra.role.description,
+    const roles: CustomRole[] = withoutHiddenRoles((user.roleAssignments || []).map(ra => ra.role)).map(role => ({
+      id: role.id,
+      name: role.name,
+      description: role.description,
     }));
     const { roleAssignments: _ra, ...userData } = user;
     return {

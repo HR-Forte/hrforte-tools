@@ -24,7 +24,7 @@ import { UpdateUserInput } from '@/modules/user/user.type';
 import { queryClient } from '@/lib/query/queryClient';
 import { authQueries } from '@/modules/auth/auth.query';
 import { toast } from 'sonner';
-import { validatePassword } from '@/modules/user/user.util';
+import { validatePassword, withoutHiddenRoles } from '@/modules/user/user.util';
 import { format } from 'date-fns';
 
 interface ChangePasswordForm {
@@ -291,7 +291,7 @@ const ProfilePage = () => {
                   <div className='mt-4 flex flex-wrap items-center justify-center gap-4 md:justify-start'>
                     <div className='flex items-center gap-2 rounded-lg bg-muted px-3 py-1.5 text-sm'>
                       <Shield className='h-4 w-4 text-muted-foreground' />
-                      <span className='text-muted-foreground'>{user.roles?.map(role => role.name).join(', ') || 'Not provided'}</span>
+                      <span className='text-muted-foreground'>{withoutHiddenRoles(user.roles).map(role => role.name).join(', ') || 'Not provided'}</span>
                     </div>
                     <div className='flex items-center gap-2 rounded-lg bg-muted px-3 py-1.5 text-sm'>
                       <Calendar className='h-4 w-4 text-muted-foreground' />
@@ -414,7 +414,7 @@ const ProfilePage = () => {
                 <Separator />
                 <div className='space-y-1'>
                   <Label className='text-xs text-muted-foreground'>Role</Label>
-                  <p className='text-sm font-medium'>{user.roles?.map(role => role.name).join(', ') || 'Not provided'}</p>
+                  <p className='text-sm font-medium'>{withoutHiddenRoles(user.roles).map(role => role.name).join(', ') || 'Not provided'}</p>
                 </div>
                 <Separator />
                 <div className='space-y-1'>
